@@ -149,7 +149,12 @@ function readInitialFromURL() {
 function writeToURL(state) {
   if (typeof window === 'undefined') return;
   try {
+    // Preserve the 'tool' query param so tab-switching state doesn't get clobbered
+    const existing = new URLSearchParams(window.location.search);
+    const tool = existing.get('tool');
+
     const p = new URLSearchParams();
+    if (tool) p.set('tool', tool);
     p.set('s', String(state.S));
     p.set('k', String(state.K));
     p.set('sigma', String(state.sigmaPct));
@@ -172,7 +177,7 @@ function writeToURL(state) {
 }
 
 // ===== Help drawer sections =====
-const HELP_SECTIONS = [
+export const HELP_SECTIONS = [
   {
     id: 'overview',
     title: 'Was zeigt der Calculator?',
@@ -426,23 +431,9 @@ const RefPillLabel = ({ viewBox, text, color, yOffset = 8 }) => {
   );
 };
 
-// Accordion section in the help drawer
-const HelpSection = ({ section, isOpen, onToggle }) => (
-  <div className="border-b border-slate-800/60 last:border-b-0">
-    <button
-      onClick={onToggle}
-      className="w-full flex items-center justify-between gap-3 py-3 text-left hover:bg-slate-800/30 -mx-2 px-2 rounded transition-colors"
-    >
-      <span className="text-sm font-semibold text-slate-200">{section.title}</span>
-      <span className={`text-cyan-500/70 text-xs transition-transform shrink-0 ${isOpen ? 'rotate-90' : ''}`}>▶</span>
-    </button>
-    {isOpen && (
-      <div className="pb-4 text-sm text-slate-400 leading-relaxed">
-        {section.content}
-      </div>
-    )}
-  </div>
-);
+// =============================================================================
+// Main component
+// =============================================================================
 
 // ===== Main Component =====
 
@@ -583,61 +574,10 @@ export default function OptionsCalculator() {
     return null;
   }, [optType, K, greeks.callPrice, greeks.putPrice]);
 
-  // === Copy link ===
-  const [copied, setCopied] = useState(false);
-  const copyLink = () => {
-    if (typeof navigator === 'undefined' || !navigator.clipboard) return;
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
-  };
-
-  // === Help drawer ===
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [firstVisit, setFirstVisit] = useState(false);
-  const [openHelpSections, setOpenHelpSections] = useState({ overview: true });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!localStorage.getItem('optionshub-help-seen')) {
-      setFirstVisit(true);
-      // Pulse stops after 8 seconds even if user ignores it
-      const t = setTimeout(() => setFirstVisit(false), 8000);
-      return () => clearTimeout(t);
-    }
-  }, []);
-
-  const openHelp = () => {
-    setHelpOpen(true);
-    setFirstVisit(false);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('optionshub-help-seen', '1');
-    }
-  };
-
-  useEffect(() => {
-    if (!helpOpen) return;
-    const onKey = (e) => { if (e.key === 'Escape') setHelpOpen(false); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [helpOpen]);
-
-  const toggleHelpSection = (id) => {
-    setOpenHelpSections(s => ({ ...s, [id]: !s[id] }));
-  };
-
   // ============================================================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 p-4 md:p-6 font-sans">
+    <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-        * { font-family: 'Manrope', system-ui, sans-serif; }
-        .font-mono, input[type="number"], select, .tabular-nums { font-family: 'JetBrains Mono', monospace !important; }
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
-
         /* Custom range slider styling */
         .ots-range { -webkit-appearance: none; appearance: none; background: transparent; height: 16px; cursor: pointer; }
         .ots-range::-webkit-slider-runnable-track {
@@ -671,74 +611,7 @@ export default function OptionsCalculator() {
         }
         .ots-range:hover::-webkit-slider-thumb { transform: scale(1.15); box-shadow: 0 0 0 1px rgba(6,182,212,0.6), 0 0 12px rgba(6,182,212,0.5); }
         .ots-range:active::-webkit-slider-thumb { transform: scale(1.25); }
-
-        /* Help button first-visit pulse */
-        @keyframes ohpulse {
-          0%   { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.55); }
-          70%  { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
-        }
-        .ohpulse { animation: ohpulse 1.8s ease-out infinite; }
-
-        @keyframes ohfade {
-          0%   { opacity: 0; transform: translateY(-4px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .ohfade { animation: ohfade 0.3s ease-out; }
       `}</style>
-
-      <div className="max-w-7xl mx-auto">
-
-        {/* ============ HEADER ============ */}
-        <header className="flex items-center justify-between mb-5 pb-4 border-b border-slate-800">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center text-2xl font-black text-slate-950 shadow-lg shadow-cyan-500/20">
-              σ
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Options Calculator</h1>
-              <p className="text-sm text-slate-500 mt-1">Was ist die Option wert? Wie reagiert sie?</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 relative">
-            <button
-              onClick={copyLink}
-              className="text-xs uppercase tracking-wider px-3 py-2 rounded-md border border-slate-800 hover:border-cyan-700 hover:text-cyan-300 text-slate-400 transition-colors flex items-center gap-2"
-            >
-              {copied ? (
-                <>
-                  <span className="text-emerald-400">✓</span>
-                  <span className="hidden sm:inline">Kopiert</span>
-                </>
-              ) : (
-                <>
-                  <span>🔗</span>
-                  <span className="hidden sm:inline">Link teilen</span>
-                </>
-              )}
-            </button>
-
-            <button
-              onClick={openHelp}
-              className={`text-xs uppercase tracking-wider px-3 py-2 rounded-md border transition-colors flex items-center gap-2 ${
-                firstVisit
-                  ? 'ohpulse border-cyan-600 text-cyan-300'
-                  : 'border-slate-800 hover:border-cyan-700 hover:text-cyan-300 text-slate-400'
-              }`}
-              aria-label="Anleitung öffnen"
-            >
-              <span className="font-bold">?</span>
-              <span className="hidden sm:inline">Anleitung</span>
-            </button>
-
-            {firstVisit && (
-              <div className="ohfade absolute top-full right-0 mt-2 px-3 py-2 bg-slate-900 border border-cyan-700/60 rounded-md text-xs text-cyan-300 whitespace-nowrap shadow-xl shadow-cyan-900/30 pointer-events-none">
-                Erste Schritte? → Hier klicken
-                <div className="absolute -top-1 right-6 w-2 h-2 bg-slate-900 border-t border-l border-cyan-700/60 rotate-45" />
-              </div>
-            )}
-          </div>
-        </header>
 
         {/* ============ INPUTS + GREEKS ============ */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
@@ -1103,55 +976,6 @@ export default function OptionsCalculator() {
             {direction === 'short' && ' Im Short-Modus wird die Prämie vereinnahmt, das maximale Verlustrisiko ist (theoretisch) unbegrenzt nach oben (Short Call) bzw. begrenzt auf Strike − Prämie (Short Put).'}
           </div>
         </section>
-
-      </div>
-
-      {/* ============ HELP DRAWER ============ */}
-      {helpOpen && (
-        <div
-          onClick={() => setHelpOpen(false)}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
-          aria-hidden="true"
-        />
-      )}
-      <aside
-        className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-slate-900/95 backdrop-blur-md border-l border-cyan-800/40 z-50 transition-transform duration-300 flex flex-col shadow-2xl shadow-black/50 ${
-          helpOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
-        }`}
-        aria-hidden={!helpOpen}
-        aria-label="Anleitung"
-      >
-        {/* Drawer header */}
-        <header className="flex items-start justify-between p-5 border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur-md z-10">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">Anleitung</h2>
-            <p className="text-xs text-slate-500 mt-0.5">So nutzt du den Options Calculator</p>
-          </div>
-          <button
-            onClick={() => setHelpOpen(false)}
-            className="w-9 h-9 rounded-md hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors text-lg"
-            aria-label="Anleitung schließen"
-          >
-            ✕
-          </button>
-        </header>
-
-        {/* Drawer scrollable body */}
-        <div className="flex-1 overflow-y-auto px-5 py-2">
-          {HELP_SECTIONS.map(section => (
-            <HelpSection
-              key={section.id}
-              section={section}
-              isOpen={!!openHelpSections[section.id]}
-              onToggle={() => toggleHelpSection(section.id)}
-            />
-          ))}
-          <div className="text-[10px] uppercase tracking-wider text-slate-600 font-mono text-center mt-6 mb-2 pb-2">
-            Esc oder Klick außerhalb schließt
-          </div>
-        </div>
-      </aside>
-
-    </div>
+    </>
   );
 }
