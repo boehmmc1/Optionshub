@@ -171,6 +171,150 @@ function writeToURL(state) {
   } catch {}
 }
 
+// ===== Help drawer sections =====
+const HELP_SECTIONS = [
+  {
+    id: 'overview',
+    title: 'Was zeigt der Calculator?',
+    content: (
+      <div className="space-y-3">
+        <p>Der Rechner zeigt dir auf einen Blick:</p>
+        <ul className="list-disc pl-5 space-y-1.5">
+          <li>Den theoretisch fairen Preis einer Option nach dem Black-Scholes-Modell</li>
+          <li>Alle Greeks (Delta, Gamma, Theta, Vega, Rho) sowie den inneren Wert für Call und Put</li>
+          <li>Wie sich Preis und Greeks ändern, wenn du einen Parameter variierst</li>
+          <li>Das Auszahlungsprofil bei Verfall – wahlweise aus Long- oder Short-Perspektive</li>
+        </ul>
+        <p>Gedacht für Stillhalter und Optionshändler, die nicht nur einzelne Werte ausrechnen, sondern auch verstehen wollen, wie sensitiv ihre Position auf Marktbewegungen reagiert.</p>
+      </div>
+    ),
+  },
+  {
+    id: 'params',
+    title: 'Die Eingabeparameter',
+    content: (
+      <dl className="space-y-2.5">
+        <div>
+          <dt className="font-semibold text-slate-200">Underlying-Preis (S)</dt>
+          <dd>Aktueller Kurs des Basiswerts (Aktie, ETF, Index).</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Strike-Preis (K)</dt>
+          <dd>Ausübungspreis der Option.</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Volatilität (σ)</dt>
+          <dd>Erwartete annualisierte Schwankungsbreite des Underlyings. Liquide Aktien: typisch 20-50 %. Biotech, Krypto, Small-Caps: deutlich darüber.</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Zinssatz (r)</dt>
+          <dd>Risikoloser Zinssatz – meist Tagesgeld- oder Kurzläufer-Zins der Bezugswährung.</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Dividendenrendite (q)</dt>
+          <dd>Jährliche Dividendenrendite des Underlyings. Bei dividendenlosen Werten (viele Tech-Werte, Krypto) 0 %.</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Restlaufzeit (t)</dt>
+          <dd>Zeit bis zum Verfall. Eingabe wahlweise als Zeitraum (Tage, Wochen, Monate) oder als konkretes Verfallsdatum.</dd>
+        </div>
+      </dl>
+    ),
+  },
+  {
+    id: 'greeks',
+    title: 'Greeks verstehen',
+    content: (
+      <dl className="space-y-2.5">
+        <div>
+          <dt className="font-semibold text-slate-200">Delta</dt>
+          <dd>Preisänderung der Option bei +1&nbsp;$ im Underlying. Ein Stillhalter mit Short Put liest hier die Wahrscheinlichkeit, ins Geld zu rutschen.</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Gamma</dt>
+          <dd>Wie stark Delta selbst auf Kursbewegungen reagiert. Hoch in der Nähe des Strikes und kurz vor Verfall – dort tobt das Risiko.</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Theta</dt>
+          <dd>Wertverlust pro Tag durch Zeitverfall. Der natürliche Freund des Stillhalters: positiv für ihn, negativ für den Long-Halter.</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Vega</dt>
+          <dd>Preisänderung pro 1&nbsp;% mehr Volatilität. Short-Positionen profitieren, wenn die Vola sinkt.</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-slate-200">Rho</dt>
+          <dd>Preisänderung pro 1&nbsp;% mehr Zinssatz. Bei kurzlaufenden Optionen meist vernachlässigbar.</dd>
+        </div>
+      </dl>
+    ),
+  },
+  {
+    id: 'sens-chart',
+    title: 'Sensitivitäts-Chart lesen',
+    content: (
+      <div className="space-y-3">
+        <p>Du wählst eine Variable für die X-Achse (z.B. Underlying-Preis oder Strike) und zwei Greeks für die beiden gestapelten Charts. Beide Greeks werden dann über den gleichen X-Bereich aufgetragen.</p>
+        <ul className="list-disc pl-5 space-y-1.5">
+          <li><strong>Cyan-gestrichelte Vertikale</strong>: zeigt deinen aktuellen Parameterwert an</li>
+          <li><strong>Auto-X</strong>: passt den X-Bereich sinnvoll an die Variable an</li>
+          <li><strong>Option Call/Put/Beide</strong>: bestimmt, was geplottet wird</li>
+        </ul>
+        <p>Praxistipp: Stell mal Strike auf die X-Achse und Theta + Delta auf die Y-Achsen. Du siehst auf einen Blick, welche Strikes für Stillhalter den besten Theta-pro-Delta-Trade liefern.</p>
+      </div>
+    ),
+  },
+  {
+    id: 'payoff',
+    title: 'Auszahlungs-Diagramm lesen',
+    content: (
+      <div className="space-y-3">
+        <p>Das Diagramm zeigt deinen Gewinn/Verlust in Abhängigkeit vom Underlying-Preis am Verfallstag. Mit dem Toggle oben rechts wählst du zwischen Long (du kaufst die Option) und Short (du verkaufst, klassischer Stillhalter).</p>
+        <ul className="list-disc pl-5 space-y-1.5">
+          <li><strong>Durchgezogene Linie</strong>: Auszahlung bei Verfall (klassischer Hockeystick)</li>
+          <li><strong>Gestrichelte Linie</strong>: aktueller Wert der Position laut BS-Modell (also: wo wärst du, wenn du heute schließt?)</li>
+          <li><strong>Spot, Strike, Break-even</strong>: farbige Pill-Labels markieren die kritischen Preispunkte</li>
+        </ul>
+        <p>Der Abstand zwischen "Heute"- und "Verfall"-Linie ist genau der Zeitwert deiner Position – das, was bis zum Verfall noch verfallen kann (Stillhalter-Sicht: Gewinn) oder verloren geht (Long-Sicht: Risiko).</p>
+      </div>
+    ),
+  },
+  {
+    id: 'example',
+    title: 'Beispiel: Short Put OTM analysieren',
+    content: (
+      <div className="space-y-3">
+        <p>Du willst einen Short Put auf eine Aktie bei 100 $ schreiben, Strike 92, 30 Tage Restlaufzeit, Vola 35 %. Vorgehen im Calculator:</p>
+        <ol className="list-decimal pl-5 space-y-1.5">
+          <li>Parameter setzen: S=100, K=92, σ=35 %, r=4.5 %, t=30 Tage</li>
+          <li>Option auf <em>Put</em>, Auszahlungs-Toggle auf <em>Short</em></li>
+          <li>In Bewertung &amp; Greeks: Put-Preis ablesen (deine Prämie pro Kontrakt × 100)</li>
+          <li>Delta beachten: niedriger negativer Wert = niedrige Wahrscheinlichkeit, ins Geld zu rutschen</li>
+          <li>Theta beachten: positiv im Short – täglicher Gewinn allein durch Zeitablauf</li>
+          <li>Auszahlungs-Diagramm: Max-Gewinn = Prämie, Verlustzone links vom Break-even</li>
+        </ol>
+        <p>Variiere dann den Strike-Slider und beobachte, wie sich Prämie, Delta und Break-even mitbewegen – so findest du das Sweet Spot für dein Risikoempfinden.</p>
+      </div>
+    ),
+  },
+  {
+    id: 'limits',
+    title: 'Modellannahmen &amp; Grenzen',
+    content: (
+      <div className="space-y-3">
+        <p>Der Rechner ist ein <strong>Bewertungswerkzeug</strong>, kein Trading-Signal. Folgende Annahmen liegen Black-Scholes zugrunde:</p>
+        <ul className="list-disc pl-5 space-y-1.5">
+          <li>Europäische Option (Ausübung nur am Verfallstag) – US-Style-Optionen können vor Verfall ausgeübt werden, was leichte Bewertungsunterschiede ergibt</li>
+          <li>Konstante Volatilität über die Laufzeit – die Realität kennt Vol-Smiles und -Skews</li>
+          <li>Kontinuierlicher Handel ohne Sprünge – Earnings-Gaps oder Crashes verletzen das</li>
+          <li>Risikoloser Zins konstant – stimmt für kurze Laufzeiten gut</li>
+        </ul>
+        <p>Praktisch heißt das: Die ausgegebenen Werte sind theoretische Referenz. Tatsächliche Marktpreise weichen ab, vor allem durch die implizite Vola, die der Markt aktuell einpreist. Das Tool ersetzt keinen Live-Datenfeed und keine eigene Risikobewertung.</p>
+      </div>
+    ),
+  },
+];
+
 // ===== UI Subcomponents =====
 
 const NumSlider = ({ label, value, onChange, step = 1, suffix, min, max, logarithmic = false }) => {
@@ -225,12 +369,12 @@ const NumSlider = ({ label, value, onChange, step = 1, suffix, min, max, logarit
 };
 
 const SelectInput = ({ label, value, onChange, options, compact }) => (
-  <label className={`flex items-center justify-between gap-3 ${compact ? '' : 'py-2 border-b border-slate-800'}`}>
-    {label && <span className="text-slate-400 text-sm font-medium tracking-wide uppercase">{label}</span>}
+  <label className={`flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3 ${compact ? '' : 'py-1 sm:py-2 sm:border-b sm:border-slate-800'}`}>
+    {label && <span className="text-slate-400 text-xs sm:text-sm font-medium tracking-wide uppercase">{label}</span>}
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-slate-950 text-cyan-300 font-mono text-right px-2 py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm"
+      className="bg-slate-950 text-cyan-300 font-mono w-full sm:w-auto px-3 py-2.5 sm:py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm sm:text-right"
     >
       {Object.entries(options).map(([k, v]) => (
         <option key={k} value={k}>{typeof v === 'string' ? v : v.label}</option>
@@ -247,6 +391,57 @@ const GreekCell = ({ value, decimals = 4, accent }) => (
   }`}>
     {Number.isFinite(value) ? value.toFixed(decimals) : '—'}
   </td>
+);
+
+// Pill-style label for chart reference lines
+const RefPillLabel = ({ viewBox, text, color, yOffset = 8 }) => {
+  if (!viewBox) return null;
+  const padding = 7;
+  const charWidth = 6.2;
+  const textWidth = text.length * charWidth + padding * 2;
+  const x = viewBox.x;
+  const y = viewBox.y - yOffset;
+  return (
+    <g style={{ pointerEvents: 'none' }}>
+      <rect
+        x={x - textWidth / 2}
+        y={y - 14}
+        width={textWidth}
+        height={14}
+        rx={3}
+        fill={color}
+      />
+      <text
+        x={x}
+        y={y - 4}
+        textAnchor="middle"
+        fill="#0a0e1a"
+        fontSize={10}
+        fontWeight={700}
+        fontFamily="JetBrains Mono, monospace"
+      >
+        {text}
+      </text>
+    </g>
+  );
+};
+
+// Accordion section in the help drawer
+const HelpSection = ({ section, isOpen, onToggle }) => (
+  <div className="border-b border-slate-800/60 last:border-b-0">
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center justify-between gap-3 py-3 text-left hover:bg-slate-800/30 -mx-2 px-2 rounded transition-colors"
+    >
+      <span className="text-sm font-semibold text-slate-200">{section.title}</span>
+      <span className={`text-cyan-500/70 text-xs transition-transform shrink-0 ${isOpen ? 'rotate-90' : ''}`}>▶</span>
+    </button>
+    {isOpen && (
+      <div className="pb-4 text-sm text-slate-400 leading-relaxed">
+        {section.content}
+      </div>
+    )}
+  </div>
 );
 
 // ===== Main Component =====
@@ -398,6 +593,40 @@ export default function OptionsCalculator() {
     });
   };
 
+  // === Help drawer ===
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [firstVisit, setFirstVisit] = useState(false);
+  const [openHelpSections, setOpenHelpSections] = useState({ overview: true });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!localStorage.getItem('optionshub-help-seen')) {
+      setFirstVisit(true);
+      // Pulse stops after 8 seconds even if user ignores it
+      const t = setTimeout(() => setFirstVisit(false), 8000);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  const openHelp = () => {
+    setHelpOpen(true);
+    setFirstVisit(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('optionshub-help-seen', '1');
+    }
+  };
+
+  useEffect(() => {
+    if (!helpOpen) return;
+    const onKey = (e) => { if (e.key === 'Escape') setHelpOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [helpOpen]);
+
+  const toggleHelpSection = (id) => {
+    setOpenHelpSections(s => ({ ...s, [id]: !s[id] }));
+  };
+
   // ============================================================
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 p-4 md:p-6 font-sans">
@@ -442,6 +671,20 @@ export default function OptionsCalculator() {
         }
         .ots-range:hover::-webkit-slider-thumb { transform: scale(1.15); box-shadow: 0 0 0 1px rgba(6,182,212,0.6), 0 0 12px rgba(6,182,212,0.5); }
         .ots-range:active::-webkit-slider-thumb { transform: scale(1.25); }
+
+        /* Help button first-visit pulse */
+        @keyframes ohpulse {
+          0%   { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.55); }
+          70%  { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+        }
+        .ohpulse { animation: ohpulse 1.8s ease-out infinite; }
+
+        @keyframes ohfade {
+          0%   { opacity: 0; transform: translateY(-4px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .ohfade { animation: ohfade 0.3s ease-out; }
       `}</style>
 
       <div className="max-w-7xl mx-auto">
@@ -457,22 +700,44 @@ export default function OptionsCalculator() {
               <p className="text-sm text-slate-500 mt-1">Was ist die Option wert? Wie reagiert sie?</p>
             </div>
           </div>
-          <button
-            onClick={copyLink}
-            className="text-xs uppercase tracking-wider px-3 py-2 rounded-md border border-slate-800 hover:border-cyan-700 hover:text-cyan-300 text-slate-400 transition-colors flex items-center gap-2"
-          >
-            {copied ? (
-              <>
-                <span className="text-emerald-400">✓</span>
-                <span>Kopiert</span>
-              </>
-            ) : (
-              <>
-                <span>🔗</span>
-                <span>Link teilen</span>
-              </>
+          <div className="flex items-center gap-2 relative">
+            <button
+              onClick={copyLink}
+              className="text-xs uppercase tracking-wider px-3 py-2 rounded-md border border-slate-800 hover:border-cyan-700 hover:text-cyan-300 text-slate-400 transition-colors flex items-center gap-2"
+            >
+              {copied ? (
+                <>
+                  <span className="text-emerald-400">✓</span>
+                  <span className="hidden sm:inline">Kopiert</span>
+                </>
+              ) : (
+                <>
+                  <span>🔗</span>
+                  <span className="hidden sm:inline">Link teilen</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={openHelp}
+              className={`text-xs uppercase tracking-wider px-3 py-2 rounded-md border transition-colors flex items-center gap-2 ${
+                firstVisit
+                  ? 'ohpulse border-cyan-600 text-cyan-300'
+                  : 'border-slate-800 hover:border-cyan-700 hover:text-cyan-300 text-slate-400'
+              }`}
+              aria-label="Anleitung öffnen"
+            >
+              <span className="font-bold">?</span>
+              <span className="hidden sm:inline">Anleitung</span>
+            </button>
+
+            {firstVisit && (
+              <div className="ohfade absolute top-full right-0 mt-2 px-3 py-2 bg-slate-900 border border-cyan-700/60 rounded-md text-xs text-cyan-300 whitespace-nowrap shadow-xl shadow-cyan-900/30 pointer-events-none">
+                Erste Schritte? → Hier klicken
+                <div className="absolute -top-1 right-6 w-2 h-2 bg-slate-900 border-t border-l border-cyan-700/60 rotate-45" />
+              </div>
             )}
-          </button>
+          </div>
         </header>
 
         {/* ============ INPUTS + GREEKS ============ */}
@@ -630,35 +895,35 @@ export default function OptionsCalculator() {
         <section className="bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-5 mb-5">
           <h2 className="text-xs uppercase tracking-[0.2em] text-cyan-400/80 font-semibold mb-4">Sensitivitäts-Chart</h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3 sm:gap-y-3">
             <SelectInput label="X-Achse" value={effectOf} onChange={setEffectOf} options={VARIABLES} />
             <SelectInput label="Oberes Y" value={yUpper}  onChange={setYUpper}   options={GREEKS} />
             <SelectInput label="Unteres Y" value={yLower} onChange={setYLower}   options={GREEKS} />
             <SelectInput label="Option"   value={optType} onChange={setOptType}  options={{ call: 'Call', put: 'Put', both: 'Beide' }} />
           </div>
 
-          <div className="mt-4 pt-4 border-t border-slate-800 flex flex-wrap items-center gap-4">
+          <div className="mt-4 pt-4 border-t border-slate-800 flex flex-wrap items-center gap-3 sm:gap-4">
             <label className="flex items-center gap-2 text-sm text-slate-400">
               <input type="checkbox" checked={autoX} onChange={(e) => setAutoX(e.target.checked)} className="accent-cyan-500 w-4 h-4" />
               <span className="uppercase tracking-wider text-xs">Auto-X</span>
             </label>
             {!autoX && (
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <label className="text-xs uppercase tracking-wider text-slate-500">Start</label>
-                  <input type="number" value={xStart} onChange={(e) => setXStart(parseFloat(e.target.value) || 0)} className="bg-slate-950 text-cyan-300 font-mono w-24 px-2 py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm" />
+              <div className="w-full sm:w-auto grid grid-cols-3 sm:flex sm:flex-wrap gap-2 sm:gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                  <label className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-500">Start</label>
+                  <input type="number" value={xStart} onChange={(e) => setXStart(parseFloat(e.target.value) || 0)} className="bg-slate-950 text-cyan-300 font-mono w-full sm:w-24 px-2 py-1.5 sm:py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm" />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <label className="text-xs uppercase tracking-wider text-slate-500">Ende</label>
-                  <input type="number" value={xEnd} onChange={(e) => setXEnd(parseFloat(e.target.value) || 0)} className="bg-slate-950 text-cyan-300 font-mono w-24 px-2 py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm" />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                  <label className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-500">Ende</label>
+                  <input type="number" value={xEnd} onChange={(e) => setXEnd(parseFloat(e.target.value) || 0)} className="bg-slate-950 text-cyan-300 font-mono w-full sm:w-24 px-2 py-1.5 sm:py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm" />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <label className="text-xs uppercase tracking-wider text-slate-500">Schritt</label>
-                  <input type="number" value={xStep} onChange={(e) => setXStep(parseFloat(e.target.value) || 1)} className="bg-slate-950 text-cyan-300 font-mono w-24 px-2 py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm" />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                  <label className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-500">Schritt</label>
+                  <input type="number" value={xStep} onChange={(e) => setXStep(parseFloat(e.target.value) || 1)} className="bg-slate-950 text-cyan-300 font-mono w-full sm:w-24 px-2 py-1.5 sm:py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm" />
                 </div>
               </div>
             )}
-            <div className="ml-auto text-[10px] uppercase tracking-wider text-slate-600 font-mono">
+            <div className="ml-auto text-[10px] uppercase tracking-wider text-slate-600 font-mono hidden sm:block">
               {chartData.length} Pts · {range.start.toFixed(2)} → {range.end.toFixed(2)}
             </div>
           </div>
@@ -769,19 +1034,19 @@ export default function OptionsCalculator() {
               Aktueller Spot (S = {S.toFixed(2)})
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="inline-block w-4 border-t border-slate-500" />
+              <span className="inline-block w-4 border-t border-slate-200" />
               Strike (K = {K.toFixed(2)})
             </span>
             {breakeven !== null && (
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-4 border-t border-dotted border-violet-400" />
+                <span className="inline-block w-4 border-t border-dashed border-violet-400" />
                 Break-even ({breakeven.toFixed(2)})
               </span>
             )}
           </div>
 
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={payoffData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <ResponsiveContainer width="100%" height={340}>
+            <LineChart data={payoffData} margin={{ top: 30, right: 20, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="s" stroke="#475569" fontSize={11} tickFormatter={(v) => v.toFixed(0)} />
               <YAxis stroke="#475569" fontSize={11} tickFormatter={(v) => v.toFixed(1)} />
@@ -791,10 +1056,30 @@ export default function OptionsCalculator() {
                 formatter={(v, name) => [v.toFixed(3) + ' $', name]}
               />
               <ReferenceLine y={0} stroke="#475569" strokeWidth={1} />
-              <ReferenceLine x={S} stroke="#06b6d4" strokeDasharray="4 4" opacity={0.7} label={{ value: 'Spot', position: 'top', fill: '#06b6d4', fontSize: 10 }} />
-              <ReferenceLine x={K} stroke="#94a3b8" strokeWidth={1} opacity={0.5} label={{ value: 'K', position: 'top', fill: '#94a3b8', fontSize: 10 }} />
+              <ReferenceLine
+                x={K}
+                stroke="#e2e8f0"
+                strokeWidth={1.5}
+                opacity={0.8}
+                label={<RefPillLabel text={`K ${K.toFixed(0)}`} color="#e2e8f0" yOffset={8} />}
+              />
+              <ReferenceLine
+                x={S}
+                stroke="#22d3ee"
+                strokeDasharray="5 3"
+                strokeWidth={1.5}
+                opacity={0.95}
+                label={<RefPillLabel text={`Spot ${S.toFixed(0)}`} color="#22d3ee" yOffset={8} />}
+              />
               {breakeven !== null && (
-                <ReferenceLine x={breakeven} stroke="#a78bfa" strokeDasharray="2 4" opacity={0.7} label={{ value: 'BE', position: 'top', fill: '#a78bfa', fontSize: 10 }} />
+                <ReferenceLine
+                  x={breakeven}
+                  stroke="#c084fc"
+                  strokeDasharray="3 3"
+                  strokeWidth={1.5}
+                  opacity={0.95}
+                  label={<RefPillLabel text={`BE ${breakeven.toFixed(0)}`} color="#c084fc" yOffset={24} />}
+                />
               )}
 
               {(optType === 'call' || optType === 'both') && (
@@ -820,6 +1105,53 @@ export default function OptionsCalculator() {
         </section>
 
       </div>
+
+      {/* ============ HELP DRAWER ============ */}
+      {helpOpen && (
+        <div
+          onClick={() => setHelpOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-slate-900/95 backdrop-blur-md border-l border-cyan-800/40 z-50 transition-transform duration-300 flex flex-col shadow-2xl shadow-black/50 ${
+          helpOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
+        }`}
+        aria-hidden={!helpOpen}
+        aria-label="Anleitung"
+      >
+        {/* Drawer header */}
+        <header className="flex items-start justify-between p-5 border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur-md z-10">
+          <div>
+            <h2 className="text-lg font-bold tracking-tight">Anleitung</h2>
+            <p className="text-xs text-slate-500 mt-0.5">So nutzt du den Options Calculator</p>
+          </div>
+          <button
+            onClick={() => setHelpOpen(false)}
+            className="w-9 h-9 rounded-md hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors text-lg"
+            aria-label="Anleitung schließen"
+          >
+            ✕
+          </button>
+        </header>
+
+        {/* Drawer scrollable body */}
+        <div className="flex-1 overflow-y-auto px-5 py-2">
+          {HELP_SECTIONS.map(section => (
+            <HelpSection
+              key={section.id}
+              section={section}
+              isOpen={!!openHelpSections[section.id]}
+              onToggle={() => toggleHelpSection(section.id)}
+            />
+          ))}
+          <div className="text-[10px] uppercase tracking-wider text-slate-600 font-mono text-center mt-6 mb-2 pb-2">
+            Esc oder Klick außerhalb schließt
+          </div>
+        </div>
+      </aside>
+
     </div>
   );
 }
