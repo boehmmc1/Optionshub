@@ -111,6 +111,40 @@ export default function App() {
           100% { opacity: 1; transform: translateY(0); }
         }
         .ohfade { animation: ohfade 0.3s ease-out; }
+
+        /* Shared range slider styling – used by NumSlider in all tools */
+        .ots-range { -webkit-appearance: none; appearance: none; background: transparent; height: 16px; cursor: pointer; }
+        .ots-range::-webkit-slider-runnable-track {
+          height: 3px;
+          background: linear-gradient(to right, #0e7490, #06b6d4);
+          border-radius: 2px;
+        }
+        .ots-range::-moz-range-track {
+          height: 3px;
+          background: linear-gradient(to right, #0e7490, #06b6d4);
+          border-radius: 2px;
+        }
+        .ots-range::-webkit-slider-thumb {
+          -webkit-appearance: none; appearance: none;
+          height: 14px; width: 14px;
+          background: #06b6d4;
+          border: 2px solid #0c4a6e;
+          border-radius: 50%;
+          margin-top: -5.5px;
+          cursor: pointer;
+          box-shadow: 0 0 0 1px rgba(6,182,212,0.4), 0 0 8px rgba(6,182,212,0.3);
+          transition: transform 0.1s, box-shadow 0.15s;
+        }
+        .ots-range::-moz-range-thumb {
+          height: 14px; width: 14px;
+          background: #06b6d4;
+          border: 2px solid #0c4a6e;
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 0 8px rgba(6,182,212,0.3);
+        }
+        .ots-range:hover::-webkit-slider-thumb { transform: scale(1.15); box-shadow: 0 0 0 1px rgba(6,182,212,0.6), 0 0 12px rgba(6,182,212,0.5); }
+        .ots-range:active::-webkit-slider-thumb { transform: scale(1.25); }
       `}</style>
 
       {/* ============ STICKY HEADER (Logo + Buttons + Tabs) ============ */}
