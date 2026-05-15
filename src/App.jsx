@@ -145,6 +145,19 @@ export default function App() {
         }
         .ots-range:hover::-webkit-slider-thumb { transform: scale(1.15); box-shadow: 0 0 0 1px rgba(6,182,212,0.6), 0 0 12px rgba(6,182,212,0.5); }
         .ots-range:active::-webkit-slider-thumb { transform: scale(1.25); }
+
+        /* Larger tap target for touch devices */
+        @media (hover: none) and (pointer: coarse) {
+          .ots-range::-webkit-slider-thumb {
+            height: 20px;
+            width: 20px;
+            margin-top: -8.5px;
+          }
+          .ots-range::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+          }
+        }
       `}</style>
 
       {/* ============ STICKY HEADER (Logo + Buttons + Tabs) ============ */}

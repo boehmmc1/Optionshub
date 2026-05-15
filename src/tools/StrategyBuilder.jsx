@@ -4,6 +4,7 @@ import {
   ResponsiveContainer, ReferenceLine, Area, ComposedChart,
 } from 'recharts';
 import NumSlider from '../components/NumSlider.jsx';
+import RefPillLabel from '../components/RefPillLabel.jsx';
 
 // ============================================================================
 // Strategy presets
@@ -693,10 +694,10 @@ export default function StrategyBuilder() {
   return (
     <>
       {/* ============ STRATEGIE + KENNZAHLEN (2-col grid like Calculator) ============ */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-5 mb-4 sm:mb-5">
 
         {/* === LEFT: Strategy selector + Spot slider === */}
-        <section className="lg:col-span-2 bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-5">
+        <section className="lg:col-span-2 bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-4 sm:p-5">
           <h2 className="text-xs uppercase tracking-[0.2em] text-cyan-400/80 font-semibold mb-3">Strategie</h2>
 
           <select
@@ -732,7 +733,7 @@ export default function StrategyBuilder() {
         </section>
 
         {/* === RIGHT: Kennzahlen table === */}
-        <section className="lg:col-span-3 bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-5">
+        <section className="lg:col-span-3 bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs uppercase tracking-[0.2em] text-cyan-400/80 font-semibold">Kennzahlen am Verfall</h2>
             <div className="flex gap-4 text-[10px] uppercase tracking-wider">
@@ -752,8 +753,8 @@ export default function StrategyBuilder() {
             <tbody className="text-sm">
               {/* Max Profit - highlighted */}
               <tr className="border-t border-slate-800/60 bg-slate-950/40">
-                <td className="py-2.5 px-3 font-bold text-slate-200">Max Profit</td>
-                <td className="font-mono text-right py-2.5 px-3 tabular-nums text-emerald-300">
+                <td className="py-2.5 px-2 sm:px-3 font-bold text-slate-200">Max Profit</td>
+                <td className="font-mono text-right py-2.5 px-2 sm:px-3 tabular-nums text-emerald-300">
                   {analysis.profitUnbounded ? '∞' : analysis.isEmpty ? '—' :
                     <FormatMoney value={analysis.maxProfit} />}
                 </td>
@@ -762,8 +763,8 @@ export default function StrategyBuilder() {
 
               {/* Max Loss - highlighted */}
               <tr className="border-t border-slate-800/60 bg-slate-950/40">
-                <td className="py-2.5 px-3 font-bold text-slate-200">Max Loss</td>
-                <td className="font-mono text-right py-2.5 px-3 tabular-nums text-rose-400">
+                <td className="py-2.5 px-2 sm:px-3 font-bold text-slate-200">Max Loss</td>
+                <td className="font-mono text-right py-2.5 px-2 sm:px-3 tabular-nums text-rose-400">
                   {analysis.lossUnbounded ? '−∞' : analysis.isEmpty ? '—' :
                     <FormatMoney value={analysis.maxLoss} />}
                 </td>
@@ -772,8 +773,8 @@ export default function StrategyBuilder() {
 
               {/* Break-Evens */}
               <tr className="border-t border-slate-800/60">
-                <td className="py-2.5 px-3 font-medium text-slate-300">Break-Evens</td>
-                <td className="font-mono text-right py-2.5 px-3 tabular-nums text-cyan-300">
+                <td className="py-2.5 px-2 sm:px-3 font-medium text-slate-300">Break-Evens</td>
+                <td className="font-mono text-right py-2.5 px-2 sm:px-3 tabular-nums text-cyan-300">
                   {analysis.breakevens.length === 0
                     ? <span className="text-slate-500">—</span>
                     : analysis.breakevens.map(b => b.toFixed(2)).join(' / ') + ' $'}
@@ -783,8 +784,8 @@ export default function StrategyBuilder() {
 
               {/* Reward / Risk */}
               <tr className="border-t border-slate-800/60">
-                <td className="py-2.5 px-3 font-medium text-slate-300">Reward / Risk</td>
-                <td className="font-mono text-right py-2.5 px-3 tabular-nums text-slate-300">
+                <td className="py-2.5 px-2 sm:px-3 font-medium text-slate-300">Reward / Risk</td>
+                <td className="font-mono text-right py-2.5 px-2 sm:px-3 tabular-nums text-slate-300">
                   {analysis.rr === null ? <span className="text-slate-500">—</span> : `1 : ${analysis.rr.toFixed(2)}`}
                 </td>
                 <td className="text-xs text-slate-500 px-3 hidden sm:table-cell">Verlust pro Gewinn-Dollar</td>
@@ -792,8 +793,8 @@ export default function StrategyBuilder() {
 
               {/* Netto-Kapital */}
               <tr className="border-t border-slate-800/60">
-                <td className="py-2.5 px-3 font-medium text-slate-300">Netto-Kapital</td>
-                <td className={`font-mono text-right py-2.5 px-3 tabular-nums ${
+                <td className="py-2.5 px-2 sm:px-3 font-medium text-slate-300">Netto-Kapital</td>
+                <td className={`font-mono text-right py-2.5 px-2 sm:px-3 tabular-nums ${
                   netCF > 0 ? 'text-emerald-300' : netCF < 0 ? 'text-rose-400' : 'text-slate-400'
                 }`}>
                   <FormatMoney value={netCF} />
@@ -806,8 +807,8 @@ export default function StrategyBuilder() {
 
               {/* Aktueller P/L */}
               <tr className="border-t border-slate-800/60">
-                <td className="py-2.5 px-3 font-medium text-slate-300">Aktueller P/L</td>
-                <td className={`font-mono text-right py-2.5 px-3 tabular-nums ${
+                <td className="py-2.5 px-2 sm:px-3 font-medium text-slate-300">Aktueller P/L</td>
+                <td className={`font-mono text-right py-2.5 px-2 sm:px-3 tabular-nums ${
                   currentPnL > 0 ? 'text-emerald-300' : currentPnL < 0 ? 'text-rose-400' : 'text-slate-400'
                 }`}>
                   <FormatMoney value={currentPnL} />
@@ -820,7 +821,7 @@ export default function StrategyBuilder() {
       </div>
 
       {/* ============ POSITIONEN (Legs) ============ */}
-      <section className="bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-5 mb-5">
+      <section className="bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-4 sm:p-5 mb-4 sm:mb-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs uppercase tracking-[0.2em] text-cyan-400/80 font-semibold">
             Positionen <span className="text-slate-600 font-normal normal-case tracking-normal ml-1">· {activeLegCount} aktiv</span>
@@ -840,7 +841,7 @@ export default function StrategyBuilder() {
       </section>
 
       {/* ============ AUSZAHLUNGS-DIAGRAMM ============ */}
-      <section className="bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-5">
+      <section className="bg-slate-900/60 backdrop-blur rounded-xl border border-slate-800 p-4 sm:p-5">
         <h2 className="text-xs uppercase tracking-[0.2em] text-cyan-400/80 font-semibold mb-3">Auszahlungs-Diagramm</h2>
 
         {analysis.isEmpty ? (
@@ -849,63 +850,64 @@ export default function StrategyBuilder() {
           </div>
         ) : (
           <>
-            <ResponsiveContainer width="100%" height={360}>
-              <ComposedChart data={chartData} margin={{ top: 16, right: 20, bottom: 12, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis
-                  dataKey="S"
-                  type="number"
-                  domain={['dataMin', 'dataMax']}
-                  tick={{ fill: '#64748b', fontSize: 11 }}
-                  tickFormatter={v => v.toFixed(0)}
-                  axisLine={{ stroke: '#334155' }}
-                />
-                <YAxis
-                  tick={{ fill: '#64748b', fontSize: 11 }}
-                  tickFormatter={v => `${v > 0 ? '+' : ''}${v.toFixed(0)}`}
-                  axisLine={{ stroke: '#334155' }}
-                />
-                <Tooltip content={<ChartTooltip />} />
-
-                <Area type="monotone" dataKey="profitArea" stroke="none" fill="#10b981" fillOpacity={0.16} isAnimationActive={false} />
-                <Area type="monotone" dataKey="lossArea"   stroke="none" fill="#f43f5e" fillOpacity={0.18} isAnimationActive={false} />
-
-                <ReferenceLine y={0} stroke="#475569" strokeWidth={1} />
-
-                {/* Strike markers */}
-                {strikesForChart.map((k, i) => (
-                  <ReferenceLine key={`k-${i}`} x={k} stroke="#475569" strokeDasharray="2 4" strokeWidth={1} />
-                ))}
-
-                {/* Spot */}
-                <ReferenceLine
-                  x={spot}
-                  stroke="#06b6d4"
-                  strokeDasharray="4 3"
-                  strokeWidth={1.5}
-                  label={{ value: `Spot ${spot.toFixed(0)}`, position: 'top', fill: '#06b6d4', fontSize: 11 }}
-                />
-
-                {/* Break-evens */}
-                {analysis.breakevens.map((b, i) => (
-                  <ReferenceLine
-                    key={`be-${i}`}
-                    x={b}
-                    stroke="#c084fc"
-                    strokeDasharray="3 3"
-                    strokeWidth={1.3}
-                    label={{ value: `BE ${b.toFixed(1)}`, position: 'top', fill: '#c084fc', fontSize: 10 }}
+            <div className="h-[300px] sm:h-[360px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData} margin={{ top: 18, right: 14, bottom: 12, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <XAxis
+                    dataKey="S"
+                    type="number"
+                    domain={['dataMin', 'dataMax']}
+                    tick={{ fill: '#64748b', fontSize: 11 }}
+                    tickFormatter={v => v.toFixed(0)}
+                    axisLine={{ stroke: '#334155' }}
                   />
-                ))}
+                  <YAxis
+                    tick={{ fill: '#64748b', fontSize: 11 }}
+                    tickFormatter={v => `${v > 0 ? '+' : ''}${v.toFixed(0)}`}
+                    axisLine={{ stroke: '#334155' }}
+                    width={42}
+                  />
+                  <Tooltip content={<ChartTooltip />} />
 
-                <Line type="monotone" dataKey="pnl" stroke="#06b6d4" strokeWidth={2.4} dot={false} isAnimationActive={false} />
-              </ComposedChart>
-            </ResponsiveContainer>
+                  <Area type="monotone" dataKey="profitArea" stroke="none" fill="#10b981" fillOpacity={0.16} isAnimationActive={false} />
+                  <Area type="monotone" dataKey="lossArea"   stroke="none" fill="#f43f5e" fillOpacity={0.18} isAnimationActive={false} />
+
+                  <ReferenceLine y={0} stroke="#475569" strokeWidth={1} />
+
+                  {/* Strike markers - no labels */}
+                  {strikesForChart.map((k, i) => (
+                    <ReferenceLine key={`k-${i}`} x={k} stroke="#475569" strokeDasharray="2 4" strokeWidth={1} />
+                  ))}
+
+                  {/* Break-evens: lines only, values are in the Kennzahlen table */}
+                  {analysis.breakevens.map((b, i) => (
+                    <ReferenceLine
+                      key={`be-${i}`}
+                      x={b}
+                      stroke="#c084fc"
+                      strokeDasharray="3 3"
+                      strokeWidth={1.3}
+                    />
+                  ))}
+
+                  {/* Spot: single pill label at top */}
+                  <ReferenceLine
+                    x={spot}
+                    stroke="#06b6d4"
+                    strokeDasharray="4 3"
+                    strokeWidth={1.5}
+                    label={<RefPillLabel text={`Spot ${spot.toFixed(0)}`} color="#22d3ee" yOffset={8} />}
+                  />
+
+                  <Line type="monotone" dataKey="pnl" stroke="#06b6d4" strokeWidth={2.4} dot={false} isAnimationActive={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
 
             <div className="mt-3 text-[11px] text-slate-500 leading-relaxed">
               X-Achse: Underlying-Preis am Verfallstag. Y-Achse: P/L der gesamten Position.
-              Grüne Fläche = Gewinn, rote Fläche = Verlust. Cyan-gestrichelt: aktueller Spot. Lila-gestrichelt: Break-Evens.
-              Strikes der Legs als graue Linien.
+              Grüne Fläche = Gewinn, rote Fläche = Verlust. Cyan-gestrichelt: Spot. Lila-gestrichelt: Break-Evens (Werte siehe Kennzahlen-Tabelle oben). Strikes als graue Linien.
             </div>
           </>
         )}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 import NumSlider from '../components/NumSlider.jsx';
+import RefPillLabel from '../components/RefPillLabel.jsx';
 
 // ===== Black-Scholes Engine =====
 
@@ -348,44 +349,9 @@ const GreekCell = ({ value, decimals = 4, accent }) => (
   </td>
 );
 
-// Pill-style label for chart reference lines
-const RefPillLabel = ({ viewBox, text, color, yOffset = 8 }) => {
-  if (!viewBox) return null;
-  const padding = 7;
-  const charWidth = 6.2;
-  const textWidth = text.length * charWidth + padding * 2;
-  const x = viewBox.x;
-  const y = viewBox.y - yOffset;
-  return (
-    <g style={{ pointerEvents: 'none' }}>
-      <rect
-        x={x - textWidth / 2}
-        y={y - 14}
-        width={textWidth}
-        height={14}
-        rx={3}
-        fill={color}
-      />
-      <text
-        x={x}
-        y={y - 4}
-        textAnchor="middle"
-        fill="#0a0e1a"
-        fontSize={10}
-        fontWeight={700}
-        fontFamily="JetBrains Mono, monospace"
-      >
-        {text}
-      </text>
-    </g>
-  );
-};
-
 // =============================================================================
 // Main component
 // =============================================================================
-
-// ===== Main Component =====
 
 export default function OptionsCalculator() {
   const initial = useMemo(() => readInitialFromURL(), []);
@@ -627,7 +593,7 @@ export default function OptionsCalculator() {
                   <th className="text-left py-1.5 px-3 font-medium"></th>
                   <th className="text-right py-1.5 px-3 font-medium">Call</th>
                   <th className="text-right py-1.5 px-3 font-medium">Put</th>
-                  <th className="text-left py-1.5 px-3 font-medium text-slate-600 font-normal normal-case tracking-normal italic">Beschreibung</th>
+                  <th className="text-left py-1.5 px-3 font-medium text-slate-600 font-normal normal-case tracking-normal italic hidden sm:table-cell">Beschreibung</th>
                 </tr>
               </thead>
               <tbody className="text-sm">
@@ -635,43 +601,43 @@ export default function OptionsCalculator() {
                   <td className="py-2.5 px-3 font-bold text-slate-200">Preis</td>
                   <GreekCell value={greeks.callPrice} decimals={4} accent="call" />
                   <GreekCell value={greeks.putPrice}  decimals={4} accent="put" />
-                  <td className="text-xs text-slate-500 px-3">Fairer Preis laut Black-Scholes-Modell</td>
+                  <td className="text-xs text-slate-500 px-3 hidden sm:table-cell">Fairer Preis laut Black-Scholes-Modell</td>
                 </tr>
                 <tr className="border-t border-slate-800/60">
                   <td className="py-2.5 px-3 font-medium text-slate-300">Innerer Wert</td>
                   <GreekCell value={callIntrinsic} decimals={4} accent="call" />
                   <GreekCell value={putIntrinsic}  decimals={4} accent="put" />
-                  <td className="text-xs text-slate-500 px-3">Wert bei sofortiger Ausübung (sonst 0)</td>
+                  <td className="text-xs text-slate-500 px-3 hidden sm:table-cell">Wert bei sofortiger Ausübung (sonst 0)</td>
                 </tr>
                 <tr className="border-t border-slate-800/60">
                   <td className="py-2.5 px-3 font-medium text-slate-300">Delta</td>
                   <GreekCell value={greeks.callDelta} decimals={4} accent="call" />
                   <GreekCell value={greeks.putDelta}  decimals={4} accent="put" />
-                  <td className="text-xs text-slate-500 px-3">Preisänderung bei +1 $ im Basiswert</td>
+                  <td className="text-xs text-slate-500 px-3 hidden sm:table-cell">Preisänderung bei +1 $ im Basiswert</td>
                 </tr>
                 <tr className="border-t border-slate-800/60">
                   <td className="py-2.5 px-3 font-medium text-slate-300">Gamma</td>
                   <GreekCell value={greeks.gamma} decimals={5} accent="call" />
                   <GreekCell value={greeks.gamma} decimals={5} accent="put" />
-                  <td className="text-xs text-slate-500 px-3">Wie stark Delta auf Kursbewegungen reagiert</td>
+                  <td className="text-xs text-slate-500 px-3 hidden sm:table-cell">Wie stark Delta auf Kursbewegungen reagiert</td>
                 </tr>
                 <tr className="border-t border-slate-800/60">
                   <td className="py-2.5 px-3 font-medium text-slate-300">Theta</td>
                   <GreekCell value={greeks.callTheta} decimals={4} accent="call" />
                   <GreekCell value={greeks.putTheta}  decimals={4} accent="put" />
-                  <td className="text-xs text-slate-500 px-3">Wertverlust pro Tag durch Zeitverfall</td>
+                  <td className="text-xs text-slate-500 px-3 hidden sm:table-cell">Wertverlust pro Tag durch Zeitverfall</td>
                 </tr>
                 <tr className="border-t border-slate-800/60">
                   <td className="py-2.5 px-3 font-medium text-slate-300">Vega</td>
                   <GreekCell value={greeks.vega} decimals={4} accent="call" />
                   <GreekCell value={greeks.vega} decimals={4} accent="put" />
-                  <td className="text-xs text-slate-500 px-3">Preisänderung bei +1 % höherer Volatilität</td>
+                  <td className="text-xs text-slate-500 px-3 hidden sm:table-cell">Preisänderung bei +1 % höherer Volatilität</td>
                 </tr>
                 <tr className="border-t border-slate-800/60">
                   <td className="py-2.5 px-3 font-medium text-slate-300">Rho</td>
                   <GreekCell value={greeks.callRho} decimals={4} accent="call" />
                   <GreekCell value={greeks.putRho}  decimals={4} accent="put" />
-                  <td className="text-xs text-slate-500 px-3">Preisänderung bei +1 % höherem Zinssatz</td>
+                  <td className="text-xs text-slate-500 px-3 hidden sm:table-cell">Preisänderung bei +1 % höherem Zinssatz</td>
                 </tr>
               </tbody>
             </table>
