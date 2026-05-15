@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
+import NumSlider from '../components/NumSlider.jsx';
 
 // ===== Black-Scholes Engine =====
 
@@ -322,57 +323,6 @@ export const HELP_SECTIONS = [
 
 // ===== UI Subcomponents =====
 
-const NumSlider = ({ label, value, onChange, step = 1, suffix, min, max, logarithmic = false }) => {
-  // Map between actual value and slider position
-  const safe = Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : min;
-  const sliderValue = (logarithmic && min > 0)
-    ? 100 * Math.log(safe / min) / Math.log(max / min)
-    : safe;
-
-  const handleSliderChange = (e) => {
-    const raw = parseFloat(e.target.value);
-    if (logarithmic && min > 0) {
-      const v = min * Math.pow(max / min, raw / 100);
-      // Adaptive precision: integer for large values, 0.1 for mid, 0.01 for small
-      const rounded = v >= 100 ? Math.round(v)
-                    : v >= 10  ? Math.round(v * 10) / 10
-                    :            Math.round(v * 100) / 100;
-      onChange(rounded);
-    } else {
-      onChange(raw);
-    }
-  };
-
-  return (
-    <div className="py-2.5 border-b border-slate-800 group">
-      <div className="flex items-center justify-between gap-3 mb-2">
-        <span className="text-slate-400 text-sm font-medium tracking-wide uppercase">{label}</span>
-        <div className="flex items-center gap-1">
-          <input
-            type="number"
-            value={value}
-            step={step}
-            onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-            className="bg-slate-950 text-cyan-300 font-mono text-right w-24 px-2 py-1 rounded border border-slate-800 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/40 transition-all text-sm"
-          />
-          {suffix && <span className="text-slate-500 text-xs font-mono w-5">{suffix}</span>}
-        </div>
-      </div>
-      {min !== undefined && max !== undefined && (
-        <input
-          type="range"
-          min={logarithmic ? 0 : min}
-          max={logarithmic ? 100 : max}
-          step={logarithmic ? 0.1 : step}
-          value={sliderValue}
-          onChange={handleSliderChange}
-          className="w-full ots-range"
-        />
-      )}
-    </div>
-  );
-};
-
 const SelectInput = ({ label, value, onChange, options, compact }) => (
   <label className={`flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3 ${compact ? '' : 'py-1 sm:py-2 sm:border-b sm:border-slate-800'}`}>
     {label && <span className="text-slate-400 text-xs sm:text-sm font-medium tracking-wide uppercase">{label}</span>}
@@ -577,42 +527,6 @@ export default function OptionsCalculator() {
   // ============================================================
   return (
     <>
-      <style>{`
-        /* Custom range slider styling */
-        .ots-range { -webkit-appearance: none; appearance: none; background: transparent; height: 16px; cursor: pointer; }
-        .ots-range::-webkit-slider-runnable-track {
-          height: 3px;
-          background: linear-gradient(to right, #0e7490, #06b6d4);
-          border-radius: 2px;
-        }
-        .ots-range::-moz-range-track {
-          height: 3px;
-          background: linear-gradient(to right, #0e7490, #06b6d4);
-          border-radius: 2px;
-        }
-        .ots-range::-webkit-slider-thumb {
-          -webkit-appearance: none; appearance: none;
-          height: 14px; width: 14px;
-          background: #06b6d4;
-          border: 2px solid #0c4a6e;
-          border-radius: 50%;
-          margin-top: -5.5px;
-          cursor: pointer;
-          box-shadow: 0 0 0 1px rgba(6,182,212,0.4), 0 0 8px rgba(6,182,212,0.3);
-          transition: transform 0.1s, box-shadow 0.15s;
-        }
-        .ots-range::-moz-range-thumb {
-          height: 14px; width: 14px;
-          background: #06b6d4;
-          border: 2px solid #0c4a6e;
-          border-radius: 50%;
-          cursor: pointer;
-          box-shadow: 0 0 8px rgba(6,182,212,0.3);
-        }
-        .ots-range:hover::-webkit-slider-thumb { transform: scale(1.15); box-shadow: 0 0 0 1px rgba(6,182,212,0.6), 0 0 12px rgba(6,182,212,0.5); }
-        .ots-range:active::-webkit-slider-thumb { transform: scale(1.25); }
-      `}</style>
-
         {/* ============ INPUTS + GREEKS ============ */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
 
