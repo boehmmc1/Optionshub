@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import OptionsCalculator, { HELP_SECTIONS as CALC_HELP } from './tools/OptionsCalculator.jsx';
 import StrategyBuilder, { HELP_SECTIONS as STRAT_HELP } from './tools/StrategyBuilder.jsx';
+import LeapCalculator, { HELP_SECTIONS as LEAP_HELP } from './tools/LeapCalculator.jsx';
 import HelpDrawer from './components/HelpDrawer.jsx';
 import TabBar from './components/TabBar.jsx';
 
@@ -25,6 +26,16 @@ const TOOLS = [
     helpSubtitle: 'Strategy Builder Übersicht',
     helpSections: STRAT_HELP,
     Component: StrategyBuilder,
+  },
+  {
+    id: 'leap',
+    label: 'LEAP Calculator',
+    title: 'LEAP Calculator',
+    subtitle: 'Long-Term Calls vs. Aktienkauf vergleichen',
+    helpTitle: 'Anleitung',
+    helpSubtitle: 'So nutzt du den LEAP Calculator',
+    helpSections: LEAP_HELP,
+    Component: LeapCalculator,
   },
 ];
 
