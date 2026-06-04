@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import OptionsCalculator, { HELP_SECTIONS as CALC_HELP } from './tools/OptionsCalculator.jsx';
 import StrategyBuilder, { HELP_SECTIONS as STRAT_HELP } from './tools/StrategyBuilder.jsx';
 import LeapCalculator, { HELP_SECTIONS as LEAP_HELP } from './tools/LeapCalculator.jsx';
+import Screenings, { HELP_SECTIONS as SCREEN_HELP } from './tools/Screenings.jsx';
 import HelpDrawer from './components/HelpDrawer.jsx';
 import TabBar from './components/TabBar.jsx';
 
@@ -36,6 +37,16 @@ const TOOLS = [
     helpSubtitle: 'So nutzt du den LEAP Calculator',
     helpSections: LEAP_HELP,
     Component: LeapCalculator,
+  },
+  {
+    id: 'screenings',
+    label: 'Screenings',
+    title: 'Screenings',
+    subtitle: 'Kuratierte Optionsstrategien aus dem aktuellen Marktumfeld',
+    helpTitle: 'Anleitung',
+    helpSubtitle: 'So nutzt du die Screenings',
+    helpSections: SCREEN_HELP,
+    Component: Screenings,
   },
 ];
 
