@@ -5,6 +5,7 @@ import LeapCalculator, { HELP_SECTIONS as LEAP_HELP } from './tools/LeapCalculat
 import Screenings, { HELP_SECTIONS as SCREEN_HELP } from './tools/Screenings.jsx';
 import HelpDrawer from './components/HelpDrawer.jsx';
 import TabBar from './components/TabBar.jsx';
+import { useAuth } from './auth/AuthContext.jsx';
 
 // Each tool registers itself here. Add new tools by appending to this array.
 const TOOLS = [
@@ -62,6 +63,7 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [firstVisit, setFirstVisit] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { signOut } = useAuth();
 
   // First-visit pulse: shows the cyan pulse + tooltip on the Help button
   // until the user clicks it or 8 seconds pass.
@@ -227,6 +229,15 @@ export default function App() {
             >
               <span className="font-bold">?</span>
               <span className="hidden sm:inline">Anleitung</span>
+            </button>
+
+            <button
+              onClick={signOut}
+              className="text-xs uppercase tracking-wider px-2.5 sm:px-3 py-2 rounded-md border border-slate-800 hover:border-cyan-700 hover:text-cyan-300 text-slate-400 transition-colors flex items-center gap-2 min-h-[36px]"
+              aria-label="Abmelden"
+            >
+              <span>⎋</span>
+              <span className="hidden sm:inline">Abmelden</span>
             </button>
 
             {firstVisit && (
